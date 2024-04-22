@@ -1,8 +1,9 @@
 // Alexander Bass
 // Created 4/16/24
+// Modified 4/21/24
 #pragma once
 
-#include "point.h"
-#include <vector>
+#include "point_list.h"
+#include "texture.h"
 
-std::vector<Point> generate_donut(u8 *bottom_texture, u8 *top_texture, u8 *side_texture, f64);
+point_list_t generate_donut(texture_t bottom, texture_t top, texture_t side);
