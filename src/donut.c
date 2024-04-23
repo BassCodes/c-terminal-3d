@@ -4,17 +4,16 @@
 
 #include "donut.h"
 #include "point.h"
-#include "types.h"
-
 #include "point_list.h"
 #include "texture.h"
+#include "types.h"
 #include "vec3.h"
-
+#include <math.h>
 vec3_t sample_rgb(texture_t tex, size_t index) {
     u8 red = tex.bytes[index];
     u8 green = tex.bytes[index + 1];
     u8 blue = tex.bytes[index + 2];
-    vec3_t color = vec3((f64)red, (f64)green, (f64)blue);
+    vec3_t color = {(f64)red, (f64)green, (f64)blue};
     color = mul_vec(color, vec3(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0));
     return color;
 };
@@ -27,16 +26,16 @@ vec3_t mix_transparency(vec3_t transparent, vec3_t solid) {
     }
 }
 void generate_cube(point_list_t *points, texture_t bottom_tex, texture_t top_tex, texture_t side_tex, i32 face_x, i32 face_y) {
-    const vec3_t grass_color_scale = vec3(0.4, 1.0, 0.4);
+    const vec3_t grass_color_scale = {0.4, 1.0, 0.4};
     const size_t image_size = 16;
-    const size_t point_count = 32;
+    const size_t point_count = 20;
     const size_t world_width = 16;
     for (size_t l_x = 0; l_x < point_count; l_x++) {
         for (size_t l_y = 0; l_y < point_count; l_y++) {
 
             f64 sx = (f64)l_x / (f64)point_count;
             f64 sy = (f64)l_y / (f64)point_count;
-            size_t index = 3 * ((size_t)(sx * (f64)(image_size)) + (size_t)(sy * (f64)(image_size)) * image_size);
+            size_t index = 3 * ((size_t)(round(sx * (f64)(image_size))) + (size_t)(round(sy * (f64)(image_size)) * image_size));
             vec3_t dirt = sample_rgb(bottom_tex, index);
             vec3_t grass = sample_rgb(top_tex, index);
             vec3_t side = sample_rgb(side_tex, index);

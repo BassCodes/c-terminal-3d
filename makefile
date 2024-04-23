@@ -6,10 +6,11 @@ SRC_DIRS 	  := ./src ./includes
 RESOURCE_DIRS := ./resources 
 
 CC  := gcc
-ld  := g++
+ld  := gcc
 
 
-BASEFLAGS = -g -Wall -Wextra -Wconversion -Wduplicated-branches -Wduplicated-cond -Wlogical-op -Wnull-dereference -Wdouble-promotion -Wshadow -Wformat=2 
+LDFLAGS = -lm
+BASEFLAGS = -std=c17 -g -O3 -D_POSIX_C_SOURCE=199309L -Wall -Wextra -Wconversion -Wduplicated-branches -Wduplicated-cond -Wlogical-op -Wnull-dereference -Wdouble-promotion -Wshadow -Wformat=2 
 CFLAGS    = $(BASEFLAGS) -Wjump-misses-init 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.
