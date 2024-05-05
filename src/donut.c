@@ -9,6 +9,7 @@
 #include "types.h"
 #include "vec3.h"
 #include <math.h>
+
 vec3_t sample_rgb(texture_t tex, size_t index) {
     u8 red = tex.bytes[index];
     u8 green = tex.bytes[index + 1];

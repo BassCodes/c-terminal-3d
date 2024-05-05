@@ -1,6 +1,6 @@
 // Alexander Bass
 // Created  4/16/24
-// Modified 4/23/24
+// Modified 5/4/24
 
 #include "donut.h"
 #include "point.h"
@@ -23,10 +23,11 @@
 #define DEPTH WIDTH
 
 #define SECONDS_TO_NANOSECONDS 1000000000
-#define FRAMERATE 30
+#define FRAMERATE 60
 
 #define LARGEST_PIXEL_CHAR_STRING "\033[38;2;255;255;255m██"
 #define LARGEST_PIXEL_CHAR_LEN sizeof(LARGEST_PIXEL_CHAR_STRING) - 1
+#define CHAR_BUFFER_CAPACITY (HEIGHT * WIDTH * LARGEST_PIXEL_CHAR_LEN + HEIGHT) * sizeof(char)
 
 void draw(vec4_t *, const point_list_t *, char *);
 void update(point_list_t *, u64);
@@ -47,19 +48,20 @@ int main() {
         pixel_buffer[i] = vec4(0.0, 0.0, 0.0, 0.0);
     };
 
-    size_t char_buffer_capacity = (HEIGHT * WIDTH * LARGEST_PIXEL_CHAR_LEN + HEIGHT);
-    char *screen_char_buffer = malloc(char_buffer_capacity * sizeof(char));
+    char *screen_char_buffer = malloc(CHAR_BUFFER_CAPACITY);
 
+#ifdef __GLIBC__
     __SYSCALL_SLONG_TYPE frame_budget = SECONDS_TO_NANOSECONDS / FRAMERATE;
     struct timespec frame_start, frame_end, sleep_time;
     sleep_time.tv_sec = 0;
     sleep_time.tv_nsec = frame_budget;
+#endif
     u64 counter = 0;
 
     while (true) {
-
+#ifdef __GLIBC__
         clock_gettime(CLOCK_MONOTONIC_RAW, &frame_start);
-
+#endif
         // Move cursor to top left
         printf("\033[0;0H");
         // Draw points
@@ -67,6 +69,7 @@ int main() {
         // Rotate points
         update(&points, counter);
 
+#ifdef __GLIBC__
         // Compute time until next frame
         clock_gettime(CLOCK_MONOTONIC_RAW, &frame_end);
         __SYSCALL_SLONG_TYPE diff_ns = frame_end.tv_nsec - frame_start.tv_nsec;
@@ -74,15 +77,20 @@ int main() {
         diff_ns += SECONDS_TO_NANOSECONDS * diff_s;
 
         __SYSCALL_SLONG_TYPE excess = diff_ns > frame_budget ? 0 : frame_budget - diff_ns;
+        // Framerate is dropping
         // if (excess == 0) {
         //     printf("\033[38;2;255;255;255mCan't keep up; Exiting. Ran for %lu frames\n", counter);
         //     exit(0);
         // }
 
         sleep_time.tv_nsec = excess;
-        counter += 1;
         // Wait until next frame
         nanosleep(&sleep_time, NULL);
+#else
+        // At least it's portable
+        sleep(1);
+#endif
+        counter += 1;
     }
 
     free_point_list(&points);
